@@ -13,7 +13,6 @@ sns.set_palette("colorblind")
 plt.rcParams['figure.figsize'] = (12, 8)
 
 # Change to the correct directory
-os.chdir(r"C:\Users\shish\HIT140-Group-Project\prakash_data_prep")
 
 print("Loading and preparing both datasets...")
 
@@ -58,6 +57,49 @@ def convert_time(time_str):
 df1_clean['start_time_dt'] = df1_clean['start_time'].apply(convert_time)
 df1_clean['sunset_time_dt'] = df1_clean['sunset_time'].apply(convert_time)
 df2_clean['time_dt'] = df2_clean['time'].apply(convert_time)
+
+# =============================================================================
+# OUTLIER HANDLING USING IQR FOR bat_landing_to_food
+# =============================================================================
+
+print("\n=== HANDLING OUTLIERS USING IQR ===")
+
+# Function to detect and handle outliers using IQR
+def handle_outliers_iqr(df, column_name):
+    # Calculate Q1, Q3 and IQR
+    Q1 = df[column_name].quantile(0.25)
+    Q3 = df[column_name].quantile(0.75)
+    IQR = Q3 - Q1
+    
+    # Define outlier bounds
+    lower_bound = Q1 - 1.5 * IQR
+    upper_bound = Q3 + 1.5 * IQR
+    
+    print(f"Column: {column_name}")
+    print(f"Q1: {Q1:.2f}, Q3: {Q3:.2f}, IQR: {IQR:.2f}")
+    print(f"Lower bound: {lower_bound:.2f}, Upper bound: {upper_bound:.2f}")
+    
+    # Count outliers
+    outliers = df[(df[column_name] < lower_bound) | (df[column_name] > upper_bound)]
+    print(f"Number of outliers detected: {len(outliers)}")
+    
+    # Option 1: Remove outliers
+    # df_clean = df[(df[column_name] >= lower_bound) & (df[column_name] <= upper_bound)]
+    
+    # Option 2: Cap outliers (winsorize)
+    df_clean = df.copy()
+    df_clean[column_name] = np.where(df_clean[column_name] < lower_bound, lower_bound, 
+                                    np.where(df_clean[column_name] > upper_bound, upper_bound, 
+                                            df_clean[column_name]))
+    
+    print(f"Original data range: [{df[column_name].min():.2f}, {df[column_name].max():.2f}]")
+    print(f"Cleaned data range: [{df_clean[column_name].min():.2f}, {df_clean[column_name].max():.2f}]")
+    print("-" * 50)
+    
+    return df_clean
+
+# Apply IQR outlier handling to bat_landing_to_food
+df1_clean = handle_outliers_iqr(df1_clean, 'bat_landing_to_food')
 
 # =============================================================================
 # COMBINE DATASETS FOR ANALYSIS
@@ -115,79 +157,102 @@ print("\nAggregate Behavior Metrics:")
 print(agg_stats)
 
 # =============================================================================
-# DATA VISUALIZATION
+# DATA VISUALIZATION - SEPARATE DIAGRAMS
 # =============================================================================
 
-print("\n=== DATA VISUALIZATION ===")
+print("\n=== CREATING SEPARATE VISUALIZATIONS ===")
 
-# Create a comprehensive visualization dashboard
-fig, axes = plt.subplots(3, 2, figsize=(15, 18))
-fig.suptitle('Comprehensive Analysis of Bat Behavior with Rats Present', fontsize=16, fontweight='bold')
-
-# 1. Bat landing time by condition (Dataset 1)
-ax1 = axes[0, 0]
-sns.boxplot(x='condition', y='bat_landing_to_food', data=df1_clean, ax=ax1)
-ax1.set_title('Time to Land on Food (Individual Events)')
-ax1.set_ylabel('Time (seconds)')
-ax1.set_xlabel('Condition')
-
-# Add statistical annotation
+# 1. Bat landing time by condition (Dataset 1) - After outlier handling
+plt.figure(figsize=(10, 6))
+sns.boxplot(x='condition', y='bat_landing_to_food', data=df1_clean)
+plt.title('Time to Land on Food (Individual Events) - After Outlier Handling')
+plt.ylabel('Time (seconds)')
+plt.xlabel('Condition')
 control_mean = df1_clean[df1_clean['condition'] == 'control']['bat_landing_to_food'].mean()
 rat_mean = df1_clean[df1_clean['condition'] == 'rat_present']['bat_landing_to_food'].mean()
-ax1.text(0.5, 0.9, f'Control: {control_mean:.2f}s\nRat: {rat_mean:.2f}s', 
-         transform=ax1.transAxes, ha='center', va='center', 
+plt.text(0.5, 0.9, f'Control: {control_mean:.2f}s\nRat: {rat_mean:.2f}s', 
+         transform=plt.gca().transAxes, ha='center', va='center', 
          bbox=dict(boxstyle="round,pad=0.3", facecolor="white", alpha=0.7))
+plt.tight_layout()
+plt.savefig('bat_landing_time_iqr.png', dpi=300, bbox_inches='tight')
+plt.show()
 
 # 2. Seconds after rat arrival (Dataset 1)
-ax2 = axes[0, 1]
-sns.boxplot(x='condition', y='seconds_after_rat_arrival', data=df1_clean, ax=ax2)
-ax2.set_title('Time After Rat Arrival (Individual Events)')
-ax2.set_ylabel('Time (seconds)')
-ax2.set_xlabel('Condition')
+plt.figure(figsize=(10, 6))
+sns.boxplot(x='condition', y='seconds_after_rat_arrival', data=df1_clean)
+plt.title('Time After Rat Arrival (Individual Events)')
+plt.ylabel('Time (seconds)')
+plt.xlabel('Condition')
+plt.tight_layout()
+plt.savefig('time_after_rat.png', dpi=300, bbox_inches='tight')
+plt.show()
 
 # 3. Bat landing number by condition (Dataset 2)
-ax3 = axes[1, 0]
-sns.boxplot(x='condition', y='bat_landing_number', data=df2_clean, ax=ax3)
-ax3.set_title('Number of Bat Landings (Time Series)')
-ax3.set_ylabel('Count')
-ax3.set_xlabel('Condition')
-
-# Add statistical annotation
+plt.figure(figsize=(10, 6))
+sns.boxplot(x='condition', y='bat_landing_number', data=df2_clean)
+plt.title('Number of Bat Landings (Time Series)')
+plt.ylabel('Count')
+plt.xlabel('Condition')
 control_mean = df2_clean[df2_clean['condition'] == 'control']['bat_landing_number'].mean()
 rat_mean = df2_clean[df2_clean['condition'] == 'rat_present']['bat_landing_number'].mean()
-ax3.text(0.5, 0.9, f'Control: {control_mean:.2f}\nRat: {rat_mean:.2f}', 
-         transform=ax3.transAxes, ha='center', va='center', 
+plt.text(0.5, 0.9, f'Control: {control_mean:.2f}\nRat: {rat_mean:.2f}', 
+         transform=plt.gca().transAxes, ha='center', va='center', 
          bbox=dict(boxstyle="round,pad=0.3", facecolor="white", alpha=0.7))
+plt.tight_layout()
+plt.savefig('bat_landing_count.png', dpi=300, bbox_inches='tight')
+plt.show()
 
 # 4. Food availability by condition (Dataset 2)
-ax4 = axes[1, 1]
-sns.boxplot(x='condition', y='food_availability', data=df2_clean, ax=ax4)
-ax4.set_title('Food Availability (Time Series)')
-ax4.set_ylabel('Availability Score')
-ax4.set_xlabel('Condition')
+plt.figure(figsize=(10, 6))
+sns.boxplot(x='condition', y='food_availability', data=df2_clean)
+plt.title('Food Availability (Time Series)')
+plt.ylabel('Availability Score')
+plt.xlabel('Condition')
+plt.tight_layout()
+plt.savefig('food_availability.png', dpi=300, bbox_inches='tight')
+plt.show()
 
 # 5. Activity by hours after sunset (combined)
-ax5 = axes[2, 0]
+plt.figure(figsize=(10, 6))
 for condition in ['control', 'rat_present']:
     subset = df2_clean[df2_clean['condition'] == condition]
     sns.lineplot(x='hours_after_sunset', y='bat_landing_number', data=subset, 
-                 label=condition, ax=ax5, ci='sd')
-ax5.set_title('Bat Activity Patterns by Time After Sunset')
-ax5.set_ylabel('Number of Bat Landings')
-ax5.set_xlabel('Hours After Sunset')
-ax5.legend()
+                 label=condition, ci='sd')
+plt.title('Bat Activity Patterns by Time After Sunset')
+plt.ylabel('Number of Bat Landings')
+plt.xlabel('Hours After Sunset')
+plt.legend()
+plt.tight_layout()
+plt.savefig('activity_patterns.png', dpi=300, bbox_inches='tight')
+plt.show()
 
 # 6. Condition distribution
-ax6 = axes[2, 1]
-condition_counts.plot(kind='bar', color=['skyblue', 'lightcoral'], ax=ax6)
-ax6.set_title('Distribution of Observations by Condition')
-ax6.set_ylabel('Count')
-ax6.set_xlabel('Condition')
+plt.figure(figsize=(10, 6))
+condition_counts.plot(kind='bar', color=['skyblue', 'lightcoral'])
+plt.title('Distribution of Observations by Condition')
+plt.ylabel('Count')
+plt.xlabel('Condition')
 for i, v in enumerate(condition_counts):
-    ax6.text(i, v + 10, str(v), ha='center', va='bottom')
+    plt.text(i, v + 10, str(v), ha='center', va='bottom')
+plt.tight_layout()
+plt.savefig('condition_distribution.png', dpi=300, bbox_inches='tight')
+plt.show()
+
+# 7. Distribution of bat_landing_to_food before and after outlier handling
+# (For comparison purposes)
+plt.figure(figsize=(12, 5))
+plt.subplot(1, 2, 1)
+sns.boxplot(y=df1['bat_landing_to_food'])
+plt.title('Original bat_landing_to_food\n(With Outliers)')
+plt.ylabel('Time (seconds)')
+
+plt.subplot(1, 2, 2)
+sns.boxplot(y=df1_clean['bat_landing_to_food'])
+plt.title('After IQR Outlier Handling')
+plt.ylabel('Time (seconds)')
 
 plt.tight_layout()
-plt.savefig('comprehensive_analysis.png', dpi=300, bbox_inches='tight')
+plt.savefig('outlier_comparison.png', dpi=300, bbox_inches='tight')
 plt.show()
 
 # =============================================================================
@@ -290,19 +355,23 @@ results['food_availability'] = perform_statistical_test(
 print("\n=== SAVING RESULTS ===")
 
 # Save cleaned datasets
-df1_clean.to_csv('cleaned_dataset1.csv', index=False)
+df1_clean.to_csv('cleaned_dataset1_iqr.csv', index=False)
 df2_clean.to_csv('cleaned_dataset2.csv', index=False)
-combined_data.to_csv('combined_analysis_data.csv', index=False)
+combined_data.to_csv('combined_analysis_data_iqr.csv', index=False)
 
 # Create a comprehensive report
-with open('comprehensive_analysis_report.txt', 'w') as f:
-    f.write("COMPREHENSIVE BAT BEHAVIOR ANALYSIS REPORT\n")
-    f.write("=" * 60 + "\n\n")
+with open('comprehensive_analysis_report_iqr.txt', 'w') as f:
+    f.write("COMPREHENSIVE BAT BEHAVIOR ANALYSIS REPORT (WITH IQR OUTLIER HANDLING)\n")
+    f.write("=" * 80 + "\n\n")
     
     f.write("DATASET INFORMATION:\n")
-    f.write(f"Dataset 1 (Individual Events): {df1.shape} -> {df1_clean.shape} after cleaning\n")
+    f.write(f"Dataset 1 (Individual Events): {df1.shape} -> {df1_clean.shape} after cleaning and outlier handling\n")
     f.write(f"Dataset 2 (Time Series): {df2.shape} -> {df2_clean.shape} after cleaning\n")
     f.write(f"Combined Dataset: {combined_data.shape}\n\n")
+    
+    f.write("OUTLIER HANDLING:\n")
+    f.write("Applied IQR method to bat_landing_to_food column with 1.5*IQR bounds\n")
+    f.write("Outliers were capped (winsorized) rather than removed\n\n")
     
     f.write("CONDITION DISTRIBUTION:\n")
     f.write(f"Control observations: {condition_counts.get('control', 0)}\n")
@@ -328,7 +397,7 @@ with open('comprehensive_analysis_report.txt', 'w') as f:
             else:
                 f.write("  CONCLUSION: No significant difference\n")
     
-    f.write("\n" + "=" * 60 + "\n")
+    f.write("\n" + "=" * 80 + "\n")
     f.write("OVERALL INTERPRETATION:\n")
     f.write("-" * 40 + "\n")
     
@@ -354,6 +423,6 @@ with open('comprehensive_analysis_report.txt', 'w') as f:
 
 print("Analysis complete!")
 print("Generated files:")
-print("- comprehensive_analysis.png (visualizations)")
-print("- comprehensive_analysis_report.txt (detailed results)")
-print("- cleaned_dataset1.csv, cleaned_dataset2.csv, combined_analysis_data.csv (cleaned data)")
+print("- 7 separate visualization diagrams (including outlier comparison)")
+print("- comprehensive_analysis_report_iqr.txt (detailed results with IQR handling)")
+print("- cleaned_dataset1_iqr.csv, cleaned_dataset2.csv, combined_analysis_data_iqr.csv (cleaned data)")
