@@ -540,174 +540,174 @@ def package_versions():
         "sklearn": skl
     }
 
-def write_report(d1, d2, stats_res, lr_res, out_path="Objective2_Report.md"):
-    print(f"{PRINT_PREFIX} Writing report → {out_path}")
-    pv = package_versions()
-    with open(out_path, "w", encoding="utf-8") as f:
-        # Title + team/date (edit names if needed)
-        f.write("# Objective 2 Report: Bat vs Rat — Investigations A & B\n\n")
-        f.write("**Team:** Prakash Bhattarai (S394859), Dipesh Wagle (S394745), "
-                "Pralin Dhungana (S395785), Bishal Dahal (S388095)\n\n")
-        f.write("**Date:** 15 October 2025\n\n")
+# def write_report(d1, d2, stats_res, lr_res, out_path="Objective2_Report.md"):
+#     print(f"{PRINT_PREFIX} Writing report → {out_path}")
+#     pv = package_versions()
+#     with open(out_path, "w", encoding="utf-8") as f:
+#         # Title + team/date (edit names if needed)
+#         f.write("# Objective 2 Report: Bat vs Rat — Investigations A & B\n\n")
+#         f.write("**Team:** Prakash Bhattarai (S394859), Dipesh Wagle (S394745), "
+#                 "Pralin Dhungana (S395785), Bishal Dahal (S388095)\n\n")
+#         f.write("**Date:** 15 October 2025\n\n")
 
-        f.write("## Abstract\n")
-        f.write("We investigated whether bats perceive rats as predators by analysing approach time, "
-                "risk/reward behaviour, and seasonal dynamics across two datasets. We used non-parametric "
-                "tests with robust outlier handling and time-aligned merges, and fit multiple linear "
-                "regression models (full and seasonal). Approach time increased with hours after sunset and "
-                "risk; seasonal models showed context-dependent effects. Despite imbalanced conditions, "
-                "results support vigilance consistent with predator perception.\n\n")
+#         f.write("## Abstract\n")
+#         f.write("We investigated whether bats perceive rats as predators by analysing approach time, "
+#                 "risk/reward behaviour, and seasonal dynamics across two datasets. We used non-parametric "
+#                 "tests with robust outlier handling and time-aligned merges, and fit multiple linear "
+#                 "regression models (full and seasonal). Approach time increased with hours after sunset and "
+#                 "risk; seasonal models showed context-dependent effects. Despite imbalanced conditions, "
+#                 "results support vigilance consistent with predator perception.\n\n")
 
-        f.write("## Introduction\n")
-        f.write("Bats may co-forage with rats at shared feeding sites. Distinguishing competitor effects from "
-                "predator perception has implications for foraging theory and risk management.\n\n")
-        f.write("### Research Question\n")
-        f.write("> Do bats perceive rats as potential predators influencing foraging and vigilance?\n\n")
-        f.write("### Hypotheses\n")
-        f.write("- Increased vigilance (longer approach time) under rat presence/risk.\n")
-        f.write("- Avoidance (lower landing success) when rats are present.\n")
-        f.write("- Seasonal modulation of these effects.\n\n")
+#         f.write("## Introduction\n")
+#         f.write("Bats may co-forage with rats at shared feeding sites. Distinguishing competitor effects from "
+#                 "predator perception has implications for foraging theory and risk management.\n\n")
+#         f.write("### Research Question\n")
+#         f.write("> Do bats perceive rats as potential predators influencing foraging and vigilance?\n\n")
+#         f.write("### Hypotheses\n")
+#         f.write("- Increased vigilance (longer approach time) under rat presence/risk.\n")
+#         f.write("- Avoidance (lower landing success) when rats are present.\n")
+#         f.write("- Seasonal modulation of these effects.\n\n")
 
-        f.write("## Datasets\n")
-        f.write("- `dataset1.csv`: Bat landing events with behavioural annotations.\n")
-        f.write("- `dataset2.csv`: 30-min surveillance summaries (rat arrivals, bat landings, food availability).\n\n")
+#         f.write("## Datasets\n")
+#         f.write("- `dataset1.csv`: Bat landing events with behavioural annotations.\n")
+#         f.write("- `dataset2.csv`: 30-min surveillance summaries (rat arrivals, bat landings, food availability).\n\n")
 
-        f.write("## Methods & Assumptions\n")
-        f.write("- Times parsed with `dayfirst=True`.\n")
-        f.write(f"- Datasets aligned on **{MERGE_FREQ}** blocks using **nearest-asof** with ±30 min tolerance; df2 aggregated per block.\n")
-        f.write("- `risk` and `reward` treated as **binary** (means = proportions; clipped to {0,1}).\n")
-        f.write("- `season_label` kept if provided; otherwise inferred from month (Summer/Autumn/Winter/Spring).\n")
-        f.write("- Outliers capped by IQR (non-destructive); analysis on capped values.\n\n")
+#         f.write("## Methods & Assumptions\n")
+#         f.write("- Times parsed with `dayfirst=True`.\n")
+#         f.write(f"- Datasets aligned on **{MERGE_FREQ}** blocks using **nearest-asof** with ±30 min tolerance; df2 aggregated per block.\n")
+#         f.write("- `risk` and `reward` treated as **binary** (means = proportions; clipped to {0,1}).\n")
+#         f.write("- `season_label` kept if provided; otherwise inferred from month (Summer/Autumn/Winter/Spring).\n")
+#         f.write("- Outliers capped by IQR (non-destructive); analysis on capped values.\n\n")
 
-        # IQR caps
-        if hasattr(d1, "__iqr_caps__") and d1.__iqr_caps__:
-            f.write("### IQR Capping Summary\n")
-            for k,v in d1.__iqr_caps__.items():
-                f.write(f"- {k}: Q1={v['Q1']:.2f}, Q3={v['Q3']:.2f}, IQR={v['IQR']:.2f}, "
-                        f"LB={v['LB']:.2f}, UB={v['UB']:.2f}, n_capped={v['n_capped']}\n")
-            f.write("\n")
+#         # IQR caps
+#         if hasattr(d1, "__iqr_caps__") and d1.__iqr_caps__:
+#             f.write("### IQR Capping Summary\n")
+#             for k,v in d1.__iqr_caps__.items():
+#                 f.write(f"- {k}: Q1={v['Q1']:.2f}, Q3={v['Q3']:.2f}, IQR={v['IQR']:.2f}, "
+#                         f"LB={v['LB']:.2f}, UB={v['UB']:.2f}, n_capped={v['n_capped']}\n")
+#             f.write("\n")
 
-        f.write("## Results: Investigation A — Predator Perception\n")
-        wrote_any = False
-        for key, val in stats_res.items():
-            if key.startswith("A_") and val.get("test")=="mannwhitney":
-                f.write(f"- {key}: U={val['U']:.3f}, p={val['p']:.4g}; "
-                        f"medians (present={val['median_present']:.2f}, absent={val['median_absent']:.2f}); "
-                        f"Cliff's δ={val['cliffs_delta']:.3f}\n")
-                wrote_any = True
-            if key.startswith("A_") and val.get("test")=="chi2":
-                f.write(f"- {key}: χ²={val['chi2']:.3f}, p={val['p']:.4g}\n")
-                wrote_any = True
-        if not wrote_any:
-            f.write("- Only one condition present; classical A tests limited.\n")
-        f.write("Figures: `figures_obj2/A1_landing_time_by_rat_presence.(png|svg)`, "
-                "`figures_obj2/A2_risk_by_rat_presence.(png|svg)`, "
-                "`figures_obj2/A3_reward_by_rat_presence.(png|svg)`, "
-                "`figures_obj2/A4_marginal_time.(png|svg)`.\n\n")
+#         f.write("## Results: Investigation A — Predator Perception\n")
+#         wrote_any = False
+#         for key, val in stats_res.items():
+#             if key.startswith("A_") and val.get("test")=="mannwhitney":
+#                 f.write(f"- {key}: U={val['U']:.3f}, p={val['p']:.4g}; "
+#                         f"medians (present={val['median_present']:.2f}, absent={val['median_absent']:.2f}); "
+#                         f"Cliff's δ={val['cliffs_delta']:.3f}\n")
+#                 wrote_any = True
+#             if key.startswith("A_") and val.get("test")=="chi2":
+#                 f.write(f"- {key}: χ²={val['chi2']:.3f}, p={val['p']:.4g}\n")
+#                 wrote_any = True
+#         if not wrote_any:
+#             f.write("- Only one condition present; classical A tests limited.\n")
+#         f.write("Figures: `figures_obj2/A1_landing_time_by_rat_presence.(png|svg)`, "
+#                 "`figures_obj2/A2_risk_by_rat_presence.(png|svg)`, "
+#                 "`figures_obj2/A3_reward_by_rat_presence.(png|svg)`, "
+#                 "`figures_obj2/A4_marginal_time.(png|svg)`.\n\n")
 
-        f.write("## Results: Investigation B — Seasonal Effects\n")
-        wrote_b = False
-        for key, val in stats_res.items():
-            if key.startswith("B_") and val.get("test")=="anova":
-                f.write(f"- {key}: ANOVA F={val['F']:.3f}, p={val['p']:.4g}\n")
-                wrote_b = True
-            if key.startswith("B_") and val.get("test")=="kruskal":
-                f.write(f"- {key}: Kruskal–Wallis H={val['H']:.3f}, p={val['p']:.4g}\n")
-                wrote_b = True
-        if not wrote_b:
-            f.write("- Only one season present; B tests limited.\n")
-        f.write("Figures: `figures_obj2/B1_time_by_season_and_rat.(png|svg)`, "
-                "`figures_obj2/B2_activity_patterns.(png|svg)`.\n\n")
+#         f.write("## Results: Investigation B — Seasonal Effects\n")
+#         wrote_b = False
+#         for key, val in stats_res.items():
+#             if key.startswith("B_") and val.get("test")=="anova":
+#                 f.write(f"- {key}: ANOVA F={val['F']:.3f}, p={val['p']:.4g}\n")
+#                 wrote_b = True
+#             if key.startswith("B_") and val.get("test")=="kruskal":
+#                 f.write(f"- {key}: Kruskal–Wallis H={val['H']:.3f}, p={val['p']:.4g}\n")
+#                 wrote_b = True
+#         if not wrote_b:
+#             f.write("- Only one season present; B tests limited.\n")
+#         f.write("Figures: `figures_obj2/B1_time_by_season_and_rat.(png|svg)`, "
+#                 "`figures_obj2/B2_activity_patterns.(png|svg)`.\n\n")
 
-        f.write("## Linear Regression Modelling\n")
-        if "A_full" in lr_res:
-            a = lr_res["A_full"]
-            f.write(f"### Full model (Investigation A)\n")
-            f.write(f"- Response: **{a['y']}**{' (log1p)' if a.get('y_log') else ''}\n")
-            f.write(f"- R² = {a['r2']:.3f} (Adj. {a['adj_r2']:.3f}), MAE = {a['mae']:.3f}, RMSE = {a['rmse']:.3f}\n")
-            top = sorted(zip(a["features"], a["coefficients"]), key=lambda x: abs(x[1]), reverse=True)[:10]
-            f.write("- Top coefficients (standardised):\n")
-            for name, val in top:
-                f.write(f"  - {name}: {val:.3f}\n")
-            f.write("Figures: "
-                    f"`figures_obj2/A_full_{a['y']}_coefficients.(png|svg)`, "
-                    f"`figures_obj2/A_full_{a['y']}_residuals.(png|svg)`, "
-                    f"`figures_obj2/A_full_{a['y']}_qq.(png|svg)`\n\n")
-        else:
-            f.write("- Not enough data for the full LR model.\n\n")
+#         f.write("## Linear Regression Modelling\n")
+#         if "A_full" in lr_res:
+#             a = lr_res["A_full"]
+#             f.write(f"### Full model (Investigation A)\n")
+#             f.write(f"- Response: **{a['y']}**{' (log1p)' if a.get('y_log') else ''}\n")
+#             f.write(f"- R² = {a['r2']:.3f} (Adj. {a['adj_r2']:.3f}), MAE = {a['mae']:.3f}, RMSE = {a['rmse']:.3f}\n")
+#             top = sorted(zip(a["features"], a["coefficients"]), key=lambda x: abs(x[1]), reverse=True)[:10]
+#             f.write("- Top coefficients (standardised):\n")
+#             for name, val in top:
+#                 f.write(f"  - {name}: {val:.3f}\n")
+#             f.write("Figures: "
+#                     f"`figures_obj2/A_full_{a['y']}_coefficients.(png|svg)`, "
+#                     f"`figures_obj2/A_full_{a['y']}_residuals.(png|svg)`, "
+#                     f"`figures_obj2/A_full_{a['y']}_qq.(png|svg)`\n\n")
+#         else:
+#             f.write("- Not enough data for the full LR model.\n\n")
 
-        f.write("### Seasonal models (Investigation B)\n")
-        seasons_written = False
-        for season in ["Summer","Autumn","Winter","Spring"]:
-            key = f"B_{season}"
-            if key in lr_res:
-                b = lr_res[key]; seasons_written = True
-                f.write(f"- **{season}** | Response: **{b['y']}**{' (log1p)' if b.get('y_log') else ''} → "
-                        f"R² = {b['r2']:.3f} (Adj. {b['adj_r2']:.3f}), MAE = {b['mae']:.3f}, RMSE = {b['rmse']:.3f}\n")
-                top = sorted(zip(b["features"], b["coefficients"]), key=lambda x: abs(x[1]), reverse=True)[:10]
-                f.write("  Top coefficients (standardised):\n")
-                for name, val in top:
-                    f.write(f"    - {name}: {val:.3f}\n")
-                f.write(f"  Figures: `figures_obj2/B_{season}_{b['y']}_coefficients.(png|svg)`, "
-                        f"`figures_obj2/B_{season}_{b['y']}_residuals.(png|svg)`, "
-                        f"`figures_obj2/B_{season}_{b['y']}_qq.(png|svg)`\n")
-        if not seasons_written:
-            f.write("- Seasonal slices were empty or too small for LR.\n")
-        f.write("\n")
+#         f.write("### Seasonal models (Investigation B)\n")
+#         seasons_written = False
+#         for season in ["Summer","Autumn","Winter","Spring"]:
+#             key = f"B_{season}"
+#             if key in lr_res:
+#                 b = lr_res[key]; seasons_written = True
+#                 f.write(f"- **{season}** | Response: **{b['y']}**{' (log1p)' if b.get('y_log') else ''} → "
+#                         f"R² = {b['r2']:.3f} (Adj. {b['adj_r2']:.3f}), MAE = {b['mae']:.3f}, RMSE = {b['rmse']:.3f}\n")
+#                 top = sorted(zip(b["features"], b["coefficients"]), key=lambda x: abs(x[1]), reverse=True)[:10]
+#                 f.write("  Top coefficients (standardised):\n")
+#                 for name, val in top:
+#                     f.write(f"    - {name}: {val:.3f}\n")
+#                 f.write(f"  Figures: `figures_obj2/B_{season}_{b['y']}_coefficients.(png|svg)`, "
+#                         f"`figures_obj2/B_{season}_{b['y']}_residuals.(png|svg)`, "
+#                         f"`figures_obj2/B_{season}_{b['y']}_qq.(png|svg)`\n")
+#         if not seasons_written:
+#             f.write("- Seasonal slices were empty or too small for LR.\n")
+#         f.write("\n")
 
-        # Discussion
-        f.write("## Discussion\n")
-        a = lr_res.get("A_full")
-        if a:
-            feats, coefs = a.get("features", []), a.get("coefficients", [])
-            def coef_of(name):
-                try: return coefs[feats.index(name)]
-                except: return None
-            c_time = coef_of("hours_after_sunset")
-            c_risk = coef_of("risk")
-            c_rat  = coef_of("rat_present_at_landing")
-            f.write("The full model explained a modest but meaningful fraction of variance (typical for field behaviour). ")
-            if c_time is not None:
-                f.write(f"**hours_after_sunset** showed a positive association with approach time (β≈{c_time:.2f}), ")
-            if c_risk is not None and c_risk>0:
-                f.write(f"and **risk** was positively associated (β≈{c_risk:.2f}), ")
-            if c_rat is not None and c_rat>0:
-                f.write(f"while **rat_present_at_landing** had a smaller positive effect (β≈{c_rat:.2f}). ")
-            f.write("These are consistent with increased vigilance under perceived risk.\n\n")
+#         # Discussion
+#         f.write("## Discussion\n")
+#         a = lr_res.get("A_full")
+#         if a:
+#             feats, coefs = a.get("features", []), a.get("coefficients", [])
+#             def coef_of(name):
+#                 try: return coefs[feats.index(name)]
+#                 except: return None
+#             c_time = coef_of("hours_after_sunset")
+#             c_risk = coef_of("risk")
+#             c_rat  = coef_of("rat_present_at_landing")
+#             f.write("The full model explained a modest but meaningful fraction of variance (typical for field behaviour). ")
+#             if c_time is not None:
+#                 f.write(f"**hours_after_sunset** showed a positive association with approach time (β≈{c_time:.2f}), ")
+#             if c_risk is not None and c_risk>0:
+#                 f.write(f"and **risk** was positively associated (β≈{c_risk:.2f}), ")
+#             if c_rat is not None and c_rat>0:
+#                 f.write(f"while **rat_present_at_landing** had a smaller positive effect (β≈{c_rat:.2f}). ")
+#             f.write("These are consistent with increased vigilance under perceived risk.\n\n")
 
-        f.write("## Conclusion\n")
-        f.write("Evidence from non-parametric tests and regression suggests bats modulate approach time with risk "
-                "and time-of-night, consistent with predator perception. Seasonal models indicate context-dependent "
-                "strength of these effects.\n\n")
+#         f.write("## Conclusion\n")
+#         f.write("Evidence from non-parametric tests and regression suggests bats modulate approach time with risk "
+#                 "and time-of-night, consistent with predator perception. Seasonal models indicate context-dependent "
+#                 "strength of these effects.\n\n")
 
-        f.write("## Figure Captions\n")
-        f.write("1. A1: Time to approach by rat presence (boxplot; IQR whiskers; n per group in title).\n")
-        f.write("2. A2: Risk-taking proportion by presence (mean ±95% CI).\n")
-        f.write("3. A3: Foraging success by presence (mean ±95% CI).\n")
-        f.write("4. A4: Marginal effect of hours after sunset on log1p(approach time).\n")
-        f.write("5. B1: Approach time by season × presence (boxplot).\n")
-        f.write("6. B2: Stacked counts by season and time-of-night bins.\n")
-        f.write("7–9+: Coefficient bars and diagnostics (residuals, Q–Q) for full/seasonal models.\n\n")
+#         f.write("## Figure Captions\n")
+#         f.write("1. A1: Time to approach by rat presence (boxplot; IQR whiskers; n per group in title).\n")
+#         f.write("2. A2: Risk-taking proportion by presence (mean ±95% CI).\n")
+#         f.write("3. A3: Foraging success by presence (mean ±95% CI).\n")
+#         f.write("4. A4: Marginal effect of hours after sunset on log1p(approach time).\n")
+#         f.write("5. B1: Approach time by season × presence (boxplot).\n")
+#         f.write("6. B2: Stacked counts by season and time-of-night bins.\n")
+#         f.write("7–9+: Coefficient bars and diagnostics (residuals, Q–Q) for full/seasonal models.\n\n")
 
-        f.write("## Individual Contributions\n")
-        f.write("- Prakash Bhattarai: Statistical design; non-parametric testing; reporting.\n")
-        f.write("- Dipesh Wagle: Data cleaning; IQR capping; integration.\n")
-        f.write("- Pralin Dhungana: Linear regression modelling; validation; metrics.\n")
-        f.write("- Bishal Dahal: Visualisation; figure styling; report formatting.\n\n")
+#         f.write("## Individual Contributions\n")
+#         f.write("- Prakash Bhattarai: Statistical design; non-parametric testing; reporting.\n")
+#         f.write("- Dipesh Wagle: Data cleaning; IQR capping; integration.\n")
+#         f.write("- Pralin Dhungana: Linear regression modelling; validation; metrics.\n")
+#         f.write("- Bishal Dahal: Visualisation; figure styling; report formatting.\n\n")
 
-        f.write("## Limitations\n")
-        if "rat_present_at_landing" in d1.columns:
-            vc = d1["rat_present_at_landing"].value_counts(dropna=False).to_dict()
-            f.write(f"- Condition balance (rat_present_at_landing): {vc}\n")
-        f.write("- Seasonal balance may be uneven; where unavailable, seasonal LR is skipped.\n")
-        f.write("- IQR capping compresses extremes; interpret effect sizes with caution.\n")
-        f.write("- Observational data; associations are not causal.\n\n")
+#         f.write("## Limitations\n")
+#         if "rat_present_at_landing" in d1.columns:
+#             vc = d1["rat_present_at_landing"].value_counts(dropna=False).to_dict()
+#             f.write(f"- Condition balance (rat_present_at_landing): {vc}\n")
+#         f.write("- Seasonal balance may be uneven; where unavailable, seasonal LR is skipped.\n")
+#         f.write("- IQR capping compresses extremes; interpret effect sizes with caution.\n")
+#         f.write("- Observational data; associations are not causal.\n\n")
 
-        f.write("## Reproducibility\n")
-        for k,v in pv.items():
-            f.write(f"- {k}: {v}\n")
+#         f.write("## Reproducibility\n")
+#         for k,v in pv.items():
+#             f.write(f"- {k}: {v}\n")
 
-    print(f"{PRINT_PREFIX} Report written: {out_path}")
+#     print(f"{PRINT_PREFIX} Report written: {out_path}")
 
 # ---------------- Main ----------------
 def main():
